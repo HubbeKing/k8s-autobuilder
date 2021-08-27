@@ -1,0 +1,28 @@
+namespace: "default"
+secret: "oauth_secret_goes_here"
+repositories:
+  "git@github.com:HubbeKing/k8s_autobuilder":
+    name: "autobuilder"
+    secret: "tWO BUTTS"
+    ssh_key: /path/to/key/for/private/repo
+    hooks:
+      - event_type: release
+        job_template: /path/to/release/job_template.yaml
+        template_vars:
+          - name: ${COMMIT}
+            value: 'payload.[release["target_commitish"]]'
+          - name: ${VERSION}
+            value: 'payload.[release["tag_name"]]'
+      - event_type: push
+        job_template: /path/to/development/job_template.yaml
+        template_vars:
+          - name: ${COMMIT_SHA}
+            value: 'payload.[commits[0]["id"][0:15]]'
+
+  "git@github.com:HubbeKing/selfhost-services":
+    name: "autoapply"
+    namespace: "not_default"
+    secret: "haha butts"
+    hooks:
+      - event_type: push
+        job_template: /path/to/job_template.yaml

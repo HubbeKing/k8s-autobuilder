@@ -1,0 +1,43 @@
+backend:
+    python, Flask
+        Listens for webhooks
+        On webhook received, do X
+            where X is "run envsubst + kubectl apply this job template"
+            Wait Y time for job to complete or fail
+                on timeout, do kubectl delete, mark build as failed
+                once job done, get logs from k8s, update repo status
+                per ekim:
+                    i think technically you'd need a Finalizer
+                    so that k8s won't delete it until you've reaped its status
+                How store logs and repo status??
+                    logs are available while the job's pod still exists
+                        pods are evicted/deleted on a node drain
+                    job completion status might be available in k8s
+                        jobs get auto-deleted but that's configurable
+                    Have some sort of SQL thing to store state?
+                        Later... for early stage, just go "up to you to make sure pod logs don't go away~"
+        Configuration stored in yaml file
+            inotify for reload/restart on config change
+            ConfigMap / Secret
+                - repo URL
+                - repo auth
+                    - path to ssh key
+                - webhook deets
+                    - OAuth
+                    - Listen for what actions?
+                    - Trigger what jobs?
+                - job template(s)
+                    - path to YAML file
+                    - required ENVs
+                    - optional ENVs?
+        webhook security:
+            https://docs.github.com/en/developers/webhooks-and-events/webhooks
+                - OAuth, whee...
+                - X-Hub-Signature-256 (HMAX/sha256 signature of webhook payload)
+
+        API for getting repo status, build logs, etc. for tying into a frontend
+        Prometheus /metrics endpoint?
+
+frontend:
+    TBD
+    Python, flask?
