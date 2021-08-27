@@ -1,0 +1,30 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: autobuilder
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+       - "*"
+    verbs:
+       - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: autobuilder
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: autobuilder
+subjects:
+  - kind: ServiceAccount
+    name: autobuilder
+    namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autobuilder
+  namespace: default

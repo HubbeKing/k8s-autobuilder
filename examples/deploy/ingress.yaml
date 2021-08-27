@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: autobuilder
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - autobuilder.YOUR.DOMAIN.HERE
+  rules:
+    - host: autobuilder.YOUR.DOMAIN.HERE
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: autobuilder
+                port:
+                  number: 8000

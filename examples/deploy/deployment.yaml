@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autobuilder
+spec:
+  selector:
+    matchLabels:
+      app: autobuilder
+  template:
+    metadata:
+      labels:
+        app: autobuilder
+    serviceAccountName: autobuilder
+    spec:
+      containers:
+        - image: ghcr.io/hubbeking/k8s-autobuilder:latest
+          name: autobuilder
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            http:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
