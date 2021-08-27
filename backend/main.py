@@ -26,7 +26,7 @@ def webhook_listener():
     if "X-Github-Event" in request.headers:
         logger.info(f"Received GitHub webhook. Parsing...")
         try:
-            payload = github_webhook_parser(request, autobuilder_config["secret"].encode("utf-8"))
+            payload = github_webhook_parser(request, autobuilder_config)
         except BadRequest as e:
             return e.description, 400
         except InternalServerError as e:

@@ -17,9 +17,6 @@ def setup_logging(logger_name):
     return logging.getLogger(logger_name)
 
 
-def load_config(config_path):
+def load_config(config_path: str) -> dict:
     config = yaml.load(config_path)
-
-
-def setup_config_reloader():
-    pass
+    return config

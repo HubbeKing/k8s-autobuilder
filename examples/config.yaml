@@ -1,9 +1,9 @@
 namespace: "default"
-secret: "oauth_secret_goes_here"
+secret: "github apps webhook secret goes here???"
 repositories:
   "git@github.com:HubbeKing/k8s_autobuilder":
     name: "autobuilder"
-    secret: "tWO BUTTS"
+    secret: "repo webhook secret goes here?"
     ssh_key: /path/to/key/for/private/repo
     hooks:
       - event_type: release
@@ -22,7 +22,7 @@ repositories:
   "git@github.com:HubbeKing/selfhost-services":
     name: "autoapply"
     namespace: "not_default"
-    secret: "haha butts"
+    secret: "repo webhook secret goes here?"
     hooks:
       - event_type: push
         job_template: /path/to/job_template.yaml

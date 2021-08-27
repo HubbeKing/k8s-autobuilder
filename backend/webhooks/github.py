@@ -19,7 +19,7 @@ def verify_payload_signature(secret: bytes, data: bytes, signature: str) -> bool
         return True
 
 
-def github_webhook_parser(request: Request, secret: Optional[bytes]) -> dict:
+def github_webhook_parser(request: Request, autobuilder_config: dict) -> dict:
     event_type = request.headers["X-Github-Event"]
     content_type = request.headers["Content-Type"]
     if content_type == "application/x-www-form-urlencoded":
@@ -34,6 +34,12 @@ def github_webhook_parser(request: Request, secret: Optional[bytes]) -> dict:
         raise BadRequest("Request body must contain JSON!")
 
     logger.debug(f"Received {event_type} event with payload {payload}")
+
+    repository = payload["repository"]
+    secret = autobuilder_config["repositories"][repository].get("secret", None)
+    if secret is None:
+        secret = autobuilder_config["secret"]
+    secret = secret.encode("utf-8")
 
     payload_signature = request.headers.get("X-Hub-Signature-256", None)
     if payload_signature is not None:
