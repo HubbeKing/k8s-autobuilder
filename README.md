@@ -10,10 +10,10 @@ Maybe don't use it if you want something stable.
 ## Configuration
 Env vars:
 - K8S_AUTOBUILDER_CONFIG: path to a config file for the autobuilder
-  - See [examples/config.yaml]
+  - See [examples/config.yaml](examples/config.yaml)
 
 Job templates:
-- See [examples/job_template.yaml] and [examples/job_template_with_vars.yaml]
+- See [examples/job_template.yaml](examples/job_template.yaml) and [examples/job_template_with_vars.yaml](examples/job_template_with_vars.yaml)
 
 Job template variables:
 - To use variables in a job template, use ${VARIABLE_NAME} syntax
