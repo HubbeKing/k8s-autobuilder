@@ -11,6 +11,17 @@ Maybe don't use it if you want something stable.
 Env vars:
 - K8S_AUTOBUILDER_CONFIG: path to a config file for the autobuilder
   - See [examples/config.yaml](examples/config.yaml)
+- K8S_AUTOBUILDER_IN_CLUSTER: set to true to use in-cluster config for kubernetes API calls
+- K8S_AUTOBUILDER_KUBE_CONFIG: set to true to use a kubeconfig file
+  - Make sure to also set KUBE_CONFIG in this case, and of course mount the file as well
+- K8S_AUTOBUILDER_MANUAL_KUBE_CONFIG: set to true to manually configure kubernetes API auth
+  - If so, use the following env vars to configure:
+    - K8S_AUTOBUILDER_KUBE_HOST: kube-apiserver host
+    - K8S_AUTOBUILDER_KUBE_VERIFY_SSL: whether or not to verify SSL
+    - K8S_AUTOBUILDER_KUBE_SSL_CA_CERT: path to mounted CA SSL cert if verify_ssl is True
+    - K8S_AUTOBUILDER_KUBE_TOKEN: bearer token for calls
+      - See here to create the token:
+      - https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/
 
 Job templates:
 - See [examples/job_template.yaml](examples/job_template.yaml) and [examples/job_template_with_vars.yaml](examples/job_template_with_vars.yaml)

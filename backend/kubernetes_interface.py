@@ -4,10 +4,30 @@ from kubernetes.client.models.v1_job import V1Job
 from kubernetes.client.models.v1_job_status import V1JobStatus
 from kubernetes.client.rest import ApiException
 import logging
+import os
 from typing import Optional
 
-# TODO support other types of config (kubeconfig file, OAuth, etc)
-config.load_incluster_config()
+if os.environ.get("K8S_AUTOBUILDER_IN_CLUSTER", False):
+    config.load_incluster_config()
+elif os.environ.get("K8S_AUTOBUILDER_KUBE_CONFIG", False):
+    if os.environ.get("KUBE_CONFIG"):
+        config.load_kube_config(os.environ.get("KUBE_CONFIG"))
+    else:
+        config.load_kube_config()
+elif os.environ.get("K8S_AUTOBUILDER_MANUAL_KUBE_CONFIG", False):
+    host = os.environ.get("K8S_AUTOBUILDER_KUBE_HOST")
+    verify_ssl = bool(os.environ.get("K8S_AUTOBUILDER_KUBE_VERIFY_SSL"))
+    ssl_cert_path = os.environ.get("K8S_AUTOBUILDER_KUBE_SSL_CA_CERT")
+    token = os.environ.get("K8S_AUTOBUILDER_KUBE_TOKEN")
+
+    configuration = client.Configuration()
+    configuration.host = host
+    configuration.verify_ssl = verify_ssl
+    if verify_ssl:
+        configuration.ssl_ca_cert = ssl_cert_path
+    configuration.api_key = {"Authorization": f"Bearer {token}"}
+    client = client.ApiClient(configuration)
+
 logger = logging.getLogger("k8s_autobuilder.backend.kubernetes_interface")
 
 
