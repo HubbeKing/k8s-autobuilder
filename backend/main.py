@@ -15,6 +15,11 @@ logger = setup_logging("k8s_autobuilder.backend")
 autobuilder_config = load_config(config_path)
 
 
+@app.route("/healthz")
+def healthcheck():
+    return 'OK', 200
+
+
 @app.route("/webhook_listener", methods=["POST"])
 def webhook_listener():
     # TODO support for non-github webooks (curl, gitea, etc)
