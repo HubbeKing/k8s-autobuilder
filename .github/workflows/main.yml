@@ -27,5 +27,5 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: ghcr.io/HubbeKing/k8s-autobuilder:latest
+          tags: ghcr.io/hubbeking/k8s-autobuilder:latest
           push: true
