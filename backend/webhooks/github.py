@@ -3,7 +3,6 @@ import hashlib
 import hmac
 import json
 import logging
-from typing import Optional
 from werkzeug.exceptions import BadRequest, InternalServerError
 
 logger = logging.getLogger("k8s_autobuilder.backend.webhooks.github")

@@ -24,7 +24,7 @@ def healthcheck():
 def webhook_listener():
     # TODO support for non-github webooks (curl, gitea, etc)
     if "X-Github-Event" in request.headers:
-        logger.info(f"Received GitHub webhook. Parsing...")
+        logger.info("Received GitHub webhook. Parsing...")
         try:
             payload = github_webhook_parser(request, autobuilder_config)
         except BadRequest as e:
