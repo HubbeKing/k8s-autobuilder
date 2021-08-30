@@ -8,4 +8,4 @@ WORKDIR /app
 
 RUN pip install .
 
-CMD gunicorn -w 4 backend.main:app
+CMD gunicorn -w 4 backend:app

@@ -10,14 +10,19 @@ repositories:
         job_template: /path/to/release/job_template.yaml
         template_vars:
           - name: ${COMMIT}
-            value: 'payload.[release["target_commitish"]]'
+            valueFrom:
+              jq: '.release.target_commitish'
           - name: ${VERSION}
-            value: 'payload.[release["tag_name"]]'
+            valueFrom:
+              jq: '.release.tag_name'
       - event_type: push
         job_template: /path/to/development/job_template.yaml
         template_vars:
           - name: ${COMMIT_SHA}
-            value: 'payload.[commits[0]["id"][0:15]]'
+            valueFrom:
+              jq: '.commits[0].id[:8]'
+          - name: ${IMAGE_TAG}
+            value: "latest"
 
   "git@github.com:HubbeKing/selfhost-services":
     name: "autoapply"

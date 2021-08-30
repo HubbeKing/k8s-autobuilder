@@ -31,6 +31,7 @@ setup(
         "Flask~=2.0.1",
         "kubernetes~=18.20.0",
         "gunicorn~=20.1.0",
+        "jq~=1.2.1",
         "PyYAML~=5.4.1",
         "Werkzeug~=2.0.1"
     ]

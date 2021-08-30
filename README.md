@@ -34,11 +34,20 @@ Env vars:
 - To use variables in a job template, use ${VARIABLE_NAME} syntax
   - For example, `name: foo-${COMMIT_SHA}`
 - Variables in a job template can be populated based on data in `config.yaml` in one of three ways:
-  - From an env var - the syntax for this is `env.ENV_VAR_NAME`
-  - From the webhook payload - the syntax for this is `payload.EVAL_STRING`
-    - **Please note that this is trivially abusable - eval() is not even remotely safe for arbitrary user input.**
-    - The eval string has the payload dict object pre-pended before eval() is called
-      - For example: `payload.[commits[0]["id"]]`
-      - This results in an evaluation of `payload[commits[0]["id"]]` - in a Github webhook this is the commit ID of the first commit.
-  - With a static string
-    - This has no special syntax - `foo`
+  - With a static value:
+      ```
+      - name: IMAGE_TAG
+        value: "latest"
+      ```
+  - With an env var:
+    ```
+    - name: KEY_PATH
+      valueFrom:
+        env: KEY_PATH
+    ```
+  - Using a jq program - note that the webhook payload will be given as the input.
+    ```
+    - name: COMMIT_SHA
+      valueFrom:
+        jq: '.commits[0]["id"]'
+    ```
