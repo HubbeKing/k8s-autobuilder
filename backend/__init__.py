@@ -88,8 +88,8 @@ def webhook_listener():
         job = create_job(job_namespace, job)
         if job is not None:
             logger.debug(f"Job creation raw result - {job}")
-            job_name = job.metadata["name"]
-            logger.info(f"Created job {job_name} for repository {repository} in namespace {job_namespace}")
+            job_name = job.metadata.name
+            logger.info(f"Created job {job_name} for repository {repository_url} in namespace {job_namespace}")
             # TODO store job name, poll for job result, store job logs and job result
         else:
             logger.error(f"Failed to create job for repository {repository} in namespace {job_namespace}")
