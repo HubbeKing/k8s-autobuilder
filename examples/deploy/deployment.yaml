@@ -15,6 +15,11 @@ spec:
       containers:
         - image: ghcr.io/hubbeking/k8s-autobuilder:latest
           name: autobuilder
+          env:
+            - name: K8S_AUTOBUILDER_CONFIG
+              value: "/configs/autobuilder.yaml"
+            - name: K8S_AUTOBUILDER_IN_CLUSTER
+              value: "True"
           ports:
             - containerPort: 8000
               name: http
@@ -32,3 +37,10 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          volumeMounts:
+            - mountPath: /configs
+              name: configs
+      volumes:
+        - name: configs
+          configMap:
+            name: autobuilder-configs

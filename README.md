@@ -39,7 +39,7 @@ Env vars:
       - name: IMAGE_TAG
         value: "latest"
       ```
-  - With an env var:
+  - With an env var - note that these are populated using the autobuilder's environment:
     ```
     - name: KEY_PATH
       valueFrom:
