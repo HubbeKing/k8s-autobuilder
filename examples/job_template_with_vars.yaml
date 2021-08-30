@@ -1,31 +1,25 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: build-${COMMIT_SHA}
+  name: autobuilder-${COMMIT_SHA}
 spec:
   template:
     spec:
       restartPolicy: Never
       containers:
-        - name: autoapply
-          image: registry.hubbe.club/autoapply:latest
+        - name: build
+          image: quay.io/buildah/stable:latest
           command: ["bash"]
-          args: ["/apply.sh"]
+          args: ["/build_script.sh"]
           env:
-            - name: SOPS_AGE_KEY_FILE
-              value: /keys.txt
+            - name: IMAGE_TAG
+              value: ${IMAGE_TAG}
           volumeMounts:
-            - mountPath: /apply.sh
-              name: apply-script
-              subPath: apply.sh
-            - mountPath: /keys.txt
-              name: age-keys
-              subPath: keys.txt
+            - mountPath: /build_script.sh
+              name: build-script
+              subPath: build_script.sh
       volumes:
-        - name: apply-script
+        - name: build-script
           configMap:
-            name: apply-script
+            name: build-script
             defaultMode: 0755
-        - name: age-keys
-          secret:
-            secretName: age-keys
