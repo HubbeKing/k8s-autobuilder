@@ -88,12 +88,10 @@ def get_latest_repo_job(namespace: str, repo_name: str) -> Optional[V1Job]:
             label_selector=f"hubbeking.k8s.autobuilder/repo_name={repo_name}",
             namespace=namespace
         )
-        latest_timestamp = datetime.min
         latest_job = None
         for job in jobs["items"]:
-            build_date = datetime.fromisoformat(job["metadata"]["labels"]["hubbeking.k8s.autobuilder/build_date"])
-            if build_date > latest_timestamp:
-                latest_timestamp = build_date
+            build_date = datetime.fromisoformat(job.metadata["labels"]["hubbeking.k8s.autobuilder/build_date"])
+            if latest_job is None or build_date > latest_job.metadata["labels"]["hubbeking.k8s.autobuilder/build_date"]:
                 latest_job = job
         return latest_job
     except ApiException:
