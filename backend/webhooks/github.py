@@ -5,6 +5,8 @@ import json
 import logging
 from werkzeug.exceptions import BadRequest, InternalServerError
 
+from backend.generics import config, get_repo_config_by_url
+
 logger = logging.getLogger("k8s_autobuilder.backend.webhooks.github")
 
 
@@ -18,7 +20,7 @@ def verify_payload_signature(secret: bytes, data: bytes, signature: str) -> bool
         return True
 
 
-def github_webhook_parser(request: Request, autobuilder_config: dict) -> dict:
+def github_webhook_parser(request: Request) -> dict:
     event_type = request.headers["X-Github-Event"]
     content_type = request.headers["Content-Type"]
     if content_type == "application/x-www-form-urlencoded":
@@ -34,10 +36,12 @@ def github_webhook_parser(request: Request, autobuilder_config: dict) -> dict:
 
     logger.debug(f"Received {event_type} event with payload {payload}")
 
-    repository = payload["repository"]
-    secret = autobuilder_config["repositories"][repository].get("secret", None)
+    repo_config = get_repo_config_by_url(payload["repository"])
+    if repo_config is None:
+        raise InternalServerError(f'No configuration for repo with URL {payload["repository"]} could be found!')
+    secret = repo_config.get("secret", None)
     if secret is None:
-        secret = autobuilder_config["secret"]
+        secret = config["secret"]
     secret = secret.encode("utf-8")
 
     payload_signature = request.headers.get("X-Hub-Signature-256", None)

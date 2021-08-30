@@ -1,33 +1,32 @@
 namespace: "default"
 secret: "github apps webhook secret goes here???"
 repositories:
-  "git@github.com:HubbeKing/k8s_autobuilder":
-    name: "autobuilder"
-    secret: "repo webhook secret goes here?"
-    ssh_key: /path/to/key/for/private/repo
-    hooks:
-      - event_type: release
-        job_template: /path/to/release/job_template.yaml
-        template_vars:
-          - name: ${COMMIT}
-            valueFrom:
-              jq: '.release.target_commitish'
-          - name: ${VERSION}
-            valueFrom:
-              jq: '.release.tag_name'
-      - event_type: push
-        job_template: /path/to/development/job_template.yaml
-        template_vars:
-          - name: ${COMMIT_SHA}
-            valueFrom:
-              jq: '.commits[0].id[:8]'
-          - name: ${IMAGE_TAG}
-            value: "latest"
-
-  "git@github.com:HubbeKing/selfhost-services":
-    name: "autoapply"
-    namespace: "not_default"
-    secret: "repo webhook secret goes here?"
-    hooks:
-      - event_type: push
-        job_template: /path/to/job_template.yaml
+  -   name: autobuilder
+      url: "git@github.com:HubbeKing/k8s_autobuilder"
+      secret: "repo webhook secret goes here?"
+      ssh_key: /path/to/key/for/private/repo
+      hooks:
+        - event_type: release
+          job_template: /path/to/release/job_template.yaml
+          template_vars:
+            - name: ${COMMIT}
+              valueFrom:
+                jq: '.release.target_commitish'
+            - name: ${VERSION}
+              valueFrom:
+                jq: '.release.tag_name'
+        - event_type: push
+          job_template: /path/to/development/job_template.yaml
+          template_vars:
+            - name: ${COMMIT_SHA}
+              valueFrom:
+                jq: '.commits[0].id[:8]'
+            - name: ${IMAGE_TAG}
+              value: "latest"
+  -   name: autoapply
+      url: "git@github.com:HubbeKing/selfhost-services"
+      namespace: "not_default"
+      secret: "repo webhook secret goes here?"
+      hooks:
+        - event_type: push
+          job_template: /path/to/job_template.yaml
