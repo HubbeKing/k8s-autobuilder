@@ -18,5 +18,7 @@ def setup_logging(logger_name):
 
 
 def load_config(config_path: str) -> dict:
-    config = yaml.load(config_path)
+    with open(config_path) as config_file:
+        # load file with full YAML language, we can assume config file is trusted input, since it's up to the user to create it
+        config = yaml.load(config_file.read(), Loader=yaml.FullLoader)
     return config
