@@ -2,7 +2,6 @@ from datetime import datetime
 from kubernetes import client, config
 from kubernetes.client.models.v1_job import V1Job
 from kubernetes.client.models.v1_job_list import V1JobList
-from kubernetes.client.models.v1_job_status import V1JobStatus
 from kubernetes.client.rest import ApiException
 import logging
 import os
@@ -55,16 +54,16 @@ def get_job_logs(namespace: str, job_name: str) -> str:
         return "Failed to retrieve job logs!"
 
 
-def get_job_status(namespace: str, job_name: str) -> Optional[V1JobStatus]:
+def get_job(namespace: str, job_name: str) -> Optional[V1Job]:
     batch_api = client.BatchV1Api()
     try:
-        job = batch_api.read_namespaced_job_status(
+        job = batch_api.read_namespaced_job(
             name=job_name,
             namespace=namespace
         )
-        return job.status
+        return job
     except ApiException:
-        logger.exception("Failed to retrieve job pod status!")
+        logger.exception("Failed to retrieve job!")
         return None
 
 

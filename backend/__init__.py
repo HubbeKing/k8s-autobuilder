@@ -6,9 +6,9 @@ import os
 import yaml
 from werkzeug.exceptions import BadRequest, InternalServerError
 
-from backend.generics import config, load_config, get_repo_config_by_name, get_repo_config_by_url, setup_logging
+from backend.generics import config, job_status_to_string, load_config, get_repo_config_by_name, get_repo_config_by_url, setup_logging, timedelta_to_string
 from backend.webhooks.github import github_webhook_parser
-from backend.kubernetes_interface import create_job, list_repo_jobs
+from backend.kubernetes_interface import create_job, get_job, get_job_logs, get_latest_repo_job, list_repo_jobs
 
 app = Flask(__name__)
 setup_logging()
@@ -16,11 +16,7 @@ load_config()
 logger = logging.getLogger("k8s_autobuilder.backend")
 
 
-
-# TODO "API" endpoints to tie in a frontend
-# TODO Job logs persistence
-# TODO Repo status persistence
-# TODO /metrics endpoint
+# TODO Persistence (logs, repo status, metrics)
 
 
 @app.route("/healthz")
@@ -96,3 +92,96 @@ def webhook_listener():
             logger.error(f'Failed to create job for repository {repo_config["name"]} in namespace {job_namespace}')
     # If we get here, the webhook has been handled to the best of our ability.
     return jsonify({"msg": "Received"})
+
+
+@app.route("/repos/list")
+def repo_list():
+    """
+    Return a list of configured repositories and their URLs
+    """
+    return [{"name": repo_config["name"], "url": repo_config["url"]} for repo_config in config["repositories"]]
+
+
+@app.route("/repos/<repo_name>/status")
+def repo_status(repo_name: str):
+    """
+    Return a dict of basic repository status for a given repo
+    """
+    repo_config = get_repo_config_by_name(repo_name)
+    if repo_config is None:
+        raise BadRequest(f"No configuration for repo named {repo_name}!")
+    # TODO get actual repo status from storage
+
+
+@app.route("/repos/<repo_name>/jobs/list")
+def repo_jobs_list(repo_name: str):
+    """
+    Return a list of job names and their result/status for a given repo
+    """
+    repo_config = get_repo_config_by_name(repo_name)
+    repo_namespace = repo_config.get("namespace", config["namespace"])
+    repo_jobs = list_repo_jobs(namespace=repo_namespace, repo_name=repo_name)
+    job_list = []
+    for job in repo_jobs.items:
+        status = job_status_to_string(job.status)
+        job_list.append({"name": job.metadata.name, "status": status})
+    return job_list
+
+
+@app.route("/repos/<repo_name>/jobs/latest")
+def repo_latest_job(repo_name: str):
+    """
+    Return name and result/status of the latest job for a given repo
+    """
+    repo_config = get_repo_config_by_name(repo_name)
+    if repo_config is None:
+        raise BadRequest(f"No config for a repo named {repo_name}!")
+    repo_namespace = repo_config.get("namespace", config["namespace"])
+    job = get_latest_repo_job(namespace=repo_namespace, repo_name=repo_name)
+    status = job_status_to_string(job.status)
+    return {
+        "name": job.metadata.name,
+        "status": status
+    }
+
+
+@app.route("/repos/<repo_name>/jobs/<job_name>/status")
+def repo_job_status(repo_name: str, job_name: str):
+    """
+    Return a dict of detailed status for a given job in a given repo
+    """
+    repo_config = get_repo_config_by_name(repo_name)
+    if repo_config is None:
+        raise BadRequest(f"No config for a repo named {repo_name}!")
+    repo_namespace = repo_config.get("namespace", config["namespace"])
+    job = get_job(namespace=repo_namespace, job_name=job_name)
+    # TODO test with a running job, see what completed_at is then and how timedelta calculation reacts
+    job_events = []
+    for condition in job.status.conditions.items:
+        job_events.append(f"{condition.message} - {condition.reason}")
+    return {
+        "name": job.metadata.name,
+        "status": job_status_to_string(job.status),
+        "start_time": job.status.start_time.isoformat(),
+        "completed_at": job.status.completed_at.isoformat(),
+        "duration": timedelta_to_string(job.status.completed_at - job.status.start_time),
+        "events": job_events
+    }
+
+
+@app.route("/repos/<repo_name>/jobs/{job_name}/logs")
+def repo_job_logs(repo_name: str, job_name: str):
+    """
+    Return build logs for a given job in a given repo
+    """
+    repo_config = get_repo_config_by_name(repo_name)
+    if repo_config is None:
+        raise BadRequest(f"No config for a repo named {repo_name}!")
+    repo_namespace = repo_config.get("namespace", config["namespace"])
+    return get_job_logs(namespace=repo_namespace, job_name=job_name)
+
+
+@app.route("/metrics")
+def metrics():
+    # TODO metrics
+    pass
