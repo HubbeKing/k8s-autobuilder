@@ -1,6 +1,7 @@
 from datetime import datetime
 from kubernetes import client, config
 from kubernetes.client.models.v1_job import V1Job
+from kubernetes.client.models.v1_job_list import V1JobList
 from kubernetes.client.models.v1_job_status import V1JobStatus
 from kubernetes.client.rest import ApiException
 import logging
@@ -64,6 +65,19 @@ def get_job_status(namespace: str, job_name: str) -> Optional[V1JobStatus]:
         return job.status
     except ApiException:
         logger.exception("Failed to retrieve job pod status!")
+        return None
+
+
+def list_repo_jobs(namespace: str, repo_name: str) -> Optional[V1JobList]:
+    batch_api = client.BatchV1Api()
+    try:
+        jobs = batch_api.list_namespaced_job(
+            label_selector=f"hubbeking.k8s.autobuilder/repo_name={repo_name}",
+            namespace=namespace
+        )
+        return jobs
+    except ApiException:
+        logger.exception("Failed to retrieve job list!")
         return None
 
 
