@@ -10,10 +10,7 @@ from typing import Optional
 if os.environ.get("K8S_AUTOBUILDER_IN_CLUSTER", False):
     config.load_incluster_config()
 elif os.environ.get("K8S_AUTOBUILDER_KUBE_CONFIG", False):
-    if os.environ.get("KUBE_CONFIG"):
-        config.load_kube_config(os.environ.get("KUBE_CONFIG"))
-    else:
-        config.load_kube_config()
+    config.load_kube_config()
 elif os.environ.get("K8S_AUTOBUILDER_MANUAL_KUBE_CONFIG", False):
     host = os.environ.get("K8S_AUTOBUILDER_KUBE_HOST")
     verify_ssl = bool(os.environ.get("K8S_AUTOBUILDER_KUBE_VERIFY_SSL"))

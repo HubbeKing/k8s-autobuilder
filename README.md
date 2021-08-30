@@ -16,7 +16,7 @@ Env vars:
   - See [examples/config.yaml](examples/config.yaml)
 - K8S_AUTOBUILDER_IN_CLUSTER: set to true to use in-cluster config for kubernetes API calls
 - K8S_AUTOBUILDER_KUBE_CONFIG: set to true to use a kubeconfig file
-  - Make sure to also set KUBE_CONFIG in this case, and of course mount the file as well
+  - Make sure to also set KUBECONFIG in this case, and of course mount the file as well
 - K8S_AUTOBUILDER_MANUAL_KUBE_CONFIG: set to true to manually configure kubernetes API auth
   - If so, use the following env vars to configure:
     - K8S_AUTOBUILDER_KUBE_HOST: kube-apiserver host
