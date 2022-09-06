@@ -8,7 +8,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='k8s_autobuilder',
-    version='0.0.1',
+    version='0.0.2',
     description='A kubernetes-native CI/CD tool',
     long_description=long_description,
     license='MIT',
@@ -28,11 +28,10 @@ setup(
     packages=find_packages(),
     python_requires='>=3.9',
     install_requires=[
-        "Flask~=2.0.1",
-        "kubernetes~=18.20.0",
+        "Flask~=2.2.2",
+        "kubernetes~=24.2.0",
         "gunicorn~=20.1.0",
-        "jq~=1.2.1",
-        "PyYAML~=5.4.1",
-        "Werkzeug~=2.0.1"
+        "jq~=1.2.2",
+        "Werkzeug~=2.2.2"
     ]
 )

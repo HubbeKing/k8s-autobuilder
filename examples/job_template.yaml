@@ -1,31 +1,35 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: autobuilder.hubbe.club/v1alpha1
+kind: AutobuilderTemplate
 metadata:
-  generateName: autoapply-
+  name: autoapply-push
 spec:
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-        - name: autoapply
-          image: registry.hubbe.club/autoapply:latest
-          command: ["bash"]
-          args: ["/apply.sh"]
-          env:
-            - name: SOPS_AGE_KEY_FILE
-              value: /keys.txt
-          volumeMounts:
-            - mountPath: /apply.sh
+  # the spec is literally just a batch/v1 Job object, with the apiVersion and kind omitted
+  metadata:
+    generateName: autoapply-
+  spec:
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: autoapply
+            image: registry.hubbe.club/autoapply:latest
+            command: ["bash"]
+            args: ["/apply.sh"]
+            env:
+              - name: SOPS_AGE_KEY_FILE
+                value: /keys.txt
+            volumeMounts:
+              - mountPath: /apply.sh
+                name: apply-script
+                subPath: apply.sh
+              - mountPath: /keys.txt
+                name: age-keys
+                subPath: keys.txt
+        volumes:
+          - name: apply-script
+            configMap:
               name: apply-script
-              subPath: apply.sh
-            - mountPath: /keys.txt
-              name: age-keys
-              subPath: keys.txt
-      volumes:
-        - name: apply-script
-          configMap:
-            name: apply-script
-            defaultMode: 0755
-        - name: age-keys
-          secret:
-            secretName: age-keys
+              defaultMode: 0755
+          - name: age-keys
+            secret:
+              secretName: age-keys

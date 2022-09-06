@@ -1,25 +1,29 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: autobuilder.hubbe.club/v1alpha1
+kind: AutobuilderTemplate
 metadata:
-  name: autobuilder-${COMMIT_SHA}
+  name: autobuilder-release
 spec:
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-        - name: build
-          image: quay.io/buildah/stable:latest
-          command: ["bash"]
-          args: ["/build_script.sh"]
-          env:
-            - name: IMAGE_TAG
-              value: ${IMAGE_TAG}
-          volumeMounts:
-            - mountPath: /build_script.sh
+  # the spec is literally just a batch/v1 Job object, with the apiVersion and kind omitted
+  metadata:
+    name: autobuilder-${COMMIT_SHA}
+  spec:
+    template:
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: build
+            image: quay.io/buildah/stable:latest
+            command: ["bash"]
+            args: ["/build_script.sh"]
+            env:
+              - name: IMAGE_TAG
+                value: ${IMAGE_TAG}
+            volumeMounts:
+              - mountPath: /build_script.sh
+                name: build-script
+                subPath: build_script.sh
+        volumes:
+          - name: build-script
+            configMap:
               name: build-script
-              subPath: build_script.sh
-      volumes:
-        - name: build-script
-          configMap:
-            name: build-script
-            defaultMode: 0755
+              defaultMode: 0755

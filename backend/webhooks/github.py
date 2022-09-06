@@ -5,7 +5,7 @@ import json
 import logging
 from werkzeug.exceptions import BadRequest, InternalServerError
 
-from backend.generics import config, get_repo_config_by_url
+from backend.kubernetes_interface import get_autobuilder_repo_config_by_url, get_secret_string
 
 logger = logging.getLogger("k8s_autobuilder.backend.webhooks.github")
 
@@ -36,13 +36,16 @@ def github_webhook_parser(request: Request) -> dict:
 
     logger.debug(f"Received {event_type} event with payload {payload}")
 
-    repo_config = get_repo_config_by_url(payload["repository"])
+    repo_config = get_autobuilder_repo_config_by_url(payload["repository"])
     if repo_config is None:
         raise InternalServerError(f'No configuration for repo with URL {payload["repository"]} could be found!')
-    secret = repo_config.get("secret", None)
-    if secret is None:
-        secret = config["secret"]
-    secret = secret.encode("utf-8")
+    webhook_secret_config = repo_config["webhookSecret"]
+    if webhook_secret_config is None:
+        logger.error(f"No webhookSecret in repository configuration for {repo_config['repository']['name']}")
+        raise InternalServerError(f"Configuration for repo {repo_config['repository']['name']} is invalid!")
+    # retrieve secret from cluster
+    secret = get_secret_string(webhook_secret_config["namespace"], webhook_secret_config["name"], webhook_secret_config["key"])
+    secret = secret.encode("utf-8")  # turn secret into bytes, as needed for verifying signature
 
     payload_signature = request.headers.get("X-Hub-Signature-256", None)
     if payload_signature is not None:

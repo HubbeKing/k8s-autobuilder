@@ -1,0 +1,37 @@
+apiVersion: autobuilder.hubbe.club/v1alpha1
+kind: AutobuilderRepository
+metadata:
+  name: autobuilder-repository
+spec:
+  repository:
+    name: "autobuilder"
+    url: "git@github.com:HubbeKing/k8s_autobuilder"
+    ssh: # optional, for authentication if this is a private repo
+      secretRef:
+        namespace: "autobuilder"
+        name: "name of secret containing SSH key"
+        key: "name of key in secret containing SSH private key data"
+  namespace: "autobuilder"
+  webhookSecret: # webhook secret for this repo
+    secretRef:
+      namespace: "autobuilder"
+      name: "name of k8s secret containing webhook secret key"
+      key: "name of key in k8s secret containing webhook secret"
+  webhooks:
+    - eventType: "release"
+      jobTemplateName: "autobuilder-release"
+      templateVariables:  # optional
+        - name: ${COMMIT}
+          valueFrom:
+            jq: '.release.target_commitish'
+        - name: ${VERSION}
+          valueFrom:
+            jq: '.release.tag_name'
+    - eventType: push
+      jobTemplateName: "autobuilder-push"
+      templateVariables:
+        - name: ${COMMIT_SHA}
+          valueFrom:
+            jq: '.commits[0].id[:8]'
+        - name: ${IMAGE_TAG}
+          value: "latest"
